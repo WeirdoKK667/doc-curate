@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "manifest.json",
+  "description": "阶段 2 素材清单 schema",
+  "type": "object",
+  "required": ["format", "pages", "summary"],
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": ["pdf", "caj", "docx", "pptx", "epub"],
+      "description": "输入格式"
+    },
+    "project": {
+      "type": "string",
+      "description": "项目名"
+    },
+    "page_range": {
+      "type": "object",
+      "properties": {
+        "start": {"type": "integer"},
+        "end": {"type": "integer"},
+        "print_offset": {"type": "integer", "default": 0}
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/page"}
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total_pages": {"type": "integer"},
+        "text_files": {"type": "integer"},
+        "tables": {"type": "integer"},
+        "images_kept": {"type": "integer"},
+        "images_ignored": {"type": "integer"},
+        "need_ocr_pages": {"type": "integer"},
+        "anomaly_pages": {"type": "integer"}
+      }
+    },
+    "extraction_confidence": {
+      "type": "string",
+      "enum": ["high", "mid", "low"],
+      "description": "整体抽取置信度"
+    }
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "required": ["page"],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "description": "PDF 物理页号"
+        },
+        "print_page": {
+          "type": "integer",
+          "description": "印刷页号"
+        },
+        "text_file": {
+          "type": "string",
+          "description": "相对路径：3 提取内容/文字/pN.md"
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string", "description": "pN_tNN"},
+              "md": {"type": "string"},
+              "json": {"type": "string"},
+              "cross_page": {"type": "boolean", "default": false},
+              "blank": {"type": "boolean", "default": false}
+            }
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string", "description": "pN_imgNN"},
+              "file": {"type": "string"},
+              "bbox": {"type": "array", "items": {"type": "number"}},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"},
+              "y0": {"type": "number"},
+              "x0": {"type": "number"},
+              "md5": {"type": "string"},
+              "reused_in_pages": {"type": "array", "items": {"type": "integer"}}
+            }
+          }
+        },
+        "images_ignored": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": {"type": "string"},
+              "reason": {"type": "string", "description": "size_below_80px / area_below_1pct"}
+            }
+          }
+        },
+        "image_count": {"type": "integer"},
+        "need_ocr": {"type": "boolean", "default": false},
+        "need_math_review": {"type": "boolean", "default": false},
+        "char_count": {"type": "integer"},
+        "anomalies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "replacement_char",
+              "empty_text",
+              "short_page",
+              "high_garbled_rate",
+              "column_skip_suspect",
+              "image_dominant"
+            ]
+          }
+        },
+        "column_skip_suspect": {"type": "boolean", "default": false},
+        "extraction_confidence": {
+          "type": "string",
+          "enum": ["high", "mid", "low"]
+        }
+      }
+    }
+  }
+}
